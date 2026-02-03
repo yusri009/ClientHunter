@@ -32,4 +32,4 @@ dist-ssr
 firebase*
 
 
-public/sample-images
+**/sample-images/
