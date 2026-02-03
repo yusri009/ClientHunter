@@ -13,7 +13,8 @@ import {
   getLeadBadgeStyle, 
   getWhatsAppUrl, 
   formatPhoneForDisplay,
-  getPrimaryCategory 
+  getPrimaryCategory,
+  handleWhatsAppCommunication
 } from '../utils/leadUtils';
 
 /**
@@ -54,11 +55,6 @@ const LeadCard = ({ place, onAddToPipeline, isInPipeline = false }) => {
     setTimeout(() => setAddResult(null), 3000);
   };
 
-  // Open WhatsApp
-  const handleWhatsAppClick = () => {
-    const message = `Hi! I noticed ${place.displayName} doesn't have a website yet. I run a web agency and would love to help you get online. Would you be interested in a quick chat?`;
-    window.open(getWhatsAppUrl(place.nationalPhoneNumber, message), '_blank');
-  };
 
   // Test WhatsApp (without message)
   const handleTestWhatsApp = () => {
@@ -131,7 +127,7 @@ const LeadCard = ({ place, onAddToPipeline, isInPipeline = false }) => {
           {/* WhatsApp Buttons */}
           <div className="flex gap-2">
             <button
-              onClick={handleWhatsAppClick}
+              onClick={() => handleWhatsAppCommunication(place.nationalPhoneNumber, place.displayName, place.category)}
               className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-green-600 hover:bg-green-500 text-white rounded-lg font-medium transition-colors"
             >
               <MessageCircle className="w-4 h-4" />

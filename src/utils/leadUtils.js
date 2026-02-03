@@ -239,3 +239,32 @@ export const getStatusColor = (status) => {
   const statusObj = LEAD_STATUSES.find(s => s.value === status);
   return statusObj ? statusObj.color : 'bg-slate-500';
 };
+
+
+export const handleWhatsAppCommunication = async (phone, businessName, category) => {
+  // 1. Prepare message and URL
+  const message = `Hi! I noticed ${businessName} doesn't have a website yet. I run a web agency and would love to help you get online. Would you be interested in a quick chat?`;
+  
+  // Assuming getWhatsAppUrl is available in this scope
+  const whatsappUrl = getWhatsAppUrl(phone, message);
+
+  try {
+    // 2. Try to fetch and copy image
+    // Ensure this path logic matches your public folder structure
+    const path = `/sample-images/${category}.png`; 
+    
+    const response = await fetch(path);
+    const blob = await response.blob();
+
+    await navigator.clipboard.write([
+      new ClipboardItem({ "image/png": blob })
+    ]);
+    console.log('Image copied to clipboard!');
+  } catch (err) {
+    // If copying fails (e.g. wrong format or mobile restriction), log it but don't stop.
+    console.error('Copy failed, proceeding to WhatsApp without image:', err);
+  } finally {
+    // 3. Open WhatsApp
+    window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+  }
+};

@@ -17,7 +17,8 @@ import {
   getWhatsAppUrl, 
   formatPhoneForDisplay,
   LEAD_STATUSES,
-  getStatusColor
+  getStatusColor,
+  handleWhatsAppCommunication
 } from '../utils/leadUtils';
 
 /**
@@ -250,7 +251,7 @@ const PipelineCard = ({
         {/* Action Buttons */}
         <div className="flex gap-2">
           <button
-            onClick={handleWhatsAppClick}
+            onClick={() => handleWhatsAppCommunication(lead.nationalPhoneNumber, lead.displayName, lead.category)}
             className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg text-sm font-medium transition-colors"
           >
             <MessageCircle className="w-4 h-4" />

@@ -32,12 +32,11 @@ const usePlacesSearch = () => {
       }
 
       // Create a PlacesService instance
-      // We need a map or a div element for the service
       const service = new window.google.maps.places.PlacesService(
         document.createElement('div')
       );
 
-      // Define the request with field masking for cost optimization
+      // Define the request
       const request = {
         query: query,
         // Sri Lanka bounds for better results
@@ -47,22 +46,12 @@ const usePlacesSearch = () => {
         }
       };
 
-      // Execute text search
-      const searchResults = await new Promise((resolve, reject) => {
-        service.textSearch(request, (results, status) => {
-          if (status === window.google.maps.places.PlacesServiceStatus.OK) {
-            resolve(results);
-          } else if (status === window.google.maps.places.PlacesServiceStatus.ZERO_RESULTS) {
-            resolve([]);
-          } else {
-            reject(new Error(`Places API Error: ${status}`));
-          }
-        });
-      });
+      // Fetch all pages of results
+      const allResults = await fetchAllPages(service, request);
 
       // For each result, get detailed information with specific fields
       const detailedResults = await Promise.all(
-        searchResults.slice(0, 20).map(place => getPlaceDetails(service, place.place_id))
+        allResults.map(place => getPlaceDetails(service, place.place_id))
       );
 
       // Filter out null results (failed detail fetches)
@@ -86,6 +75,39 @@ const usePlacesSearch = () => {
       setLoading(false);
     }
   }, []);
+
+  /**
+   * Fetch all pages of search results
+   * Google Places API returns up to 20 results per page, with max 3 pages (60 results total)
+   */
+  const fetchAllPages = (service, request) => {
+    return new Promise((resolve, reject) => {
+      const allResults = [];
+
+      const handleResults = (results, status, pagination) => {
+        if (status === window.google.maps.places.PlacesServiceStatus.OK) {
+          allResults.push(...results);
+
+          // Check if there are more pages
+          if (pagination && pagination.hasNextPage) {
+            // Wait 2 seconds before fetching next page (API requirement)
+            setTimeout(() => {
+              pagination.nextPage();
+            }, 2000);
+          } else {
+            // No more pages, resolve with all results
+            resolve(allResults);
+          }
+        } else if (status === window.google.maps.places.PlacesServiceStatus.ZERO_RESULTS) {
+          resolve(allResults);
+        } else {
+          reject(new Error(`Places API Error: ${status}`));
+        }
+      };
+
+      service.textSearch(request, handleResults);
+    });
+  };
 
   /**
    * Get detailed place information
